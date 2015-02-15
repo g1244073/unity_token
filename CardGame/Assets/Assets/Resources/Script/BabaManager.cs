@@ -31,11 +31,15 @@ public class BabaManager : MonoBehaviour
 	public string OutPC;
 
     public Canvas canvas;
+
+    public int GameMode = 0;
 	// Use this for initialization
 	void Start () 
 	
 	{
 		Debug.Log("PvPババ抜きの準備開始");
+		Debug.Log("ゲームモードを[準備]に変更");
+
 
 		//-----------------OSCの環境を構築----------------
 		OSC = (GameObject)Instantiate(OSC);
@@ -78,7 +82,7 @@ public class BabaManager : MonoBehaviour
 			if(Physics.Raycast(ray,out hit))
 			{
 
-				if(hit.collider.gameObject.tag == "Card")
+				if(hit.collider.gameObject.tag == "Card" && GameMode == 1)
 				{
 					Debug.Log("card認識");
 					
@@ -91,7 +95,7 @@ public class BabaManager : MonoBehaviour
 				{
 
 				}
-				else if(hit.collider.gameObject.tag == "Restart")
+				else if(hit.collider.gameObject.tag == "Restart" && (GameMode == 1 || GameMode == 2))
 				{					
 					GameObject[] objs = GameObject.FindGameObjectsWithTag("Card");
 					foreach(GameObject obj in objs)
@@ -102,14 +106,16 @@ public class BabaManager : MonoBehaviour
 
 					Start();
 				}
-				else if(hit.collider.gameObject.tag == "send")
+				else if(hit.collider.gameObject.tag == "send" && GameMode == 0)
 				{					
 					oscController.makeClient();
 				}
-				else if(hit.collider.gameObject.tag == "MakeDeck")
+				else if(hit.collider.gameObject.tag == "MakeDeck" && GameMode == 0)
 				{
 					deck = creatDeck.creatDeck();
 					oscController.sendDeck("deck",deck);
+					GameMode = 1;
+					Debug.Log("ゲームモードを[開始]に変更");
 				}
 			}
 		}
@@ -287,7 +293,10 @@ public class BabaManager : MonoBehaviour
 				if(this.CheckDeck() == true)
 				{
 					Debug.Log("Deck同期完了");
-					oscController.sendMessage("send","デッキ構築完了");
+					oscController.sendMessage("SendMessage","デッキ構築完了");
+					GameMode = 1;
+					Debug.Log("ゲームモードを[開始]に変更");
+
 				}
 				else if(this.CheckDeck() == false)
 				{
@@ -296,7 +305,7 @@ public class BabaManager : MonoBehaviour
 			}
 
 
-			else if(messageData[1].ToString() == "send")
+			else if(messageData[1].ToString() == "SendMessage")
   			{
   				Debug.Log("デッキ構築完了[確認]" + messageData[2].ToString());
 			}
