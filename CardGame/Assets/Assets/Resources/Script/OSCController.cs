@@ -103,7 +103,7 @@ public class OSCController : MonoBehaviour
 
 	public string catchMessage()
 	{
-		if(saveString != OSCHandler.Instance.getLastPacket() || saveString == null)
+		if((saveString != OSCHandler.Instance.getLastPacket() || saveString == null) || (OSCHandler.Instance.getLastPacket().Contains("RequestDeck")) )
 		{			
 			saveString = OSCHandler.Instance.getLastPacket();
 			return saveString;
@@ -121,6 +121,13 @@ public class OSCController : MonoBehaviour
 	{
 		Debug.Log("CheckDeck");
 		string message = thisPC + "/"+sys+"/"; 
+		OSCHandler.Instance.SendMessageToClient(this.OutPCs,this.TargetAddr,message);
+	}
+
+	public void sendMessage(string sys,string messages)
+	{
+		Debug.Log("send");
+		string message = thisPC + "/"+sys+"/"+ messages; 
 		OSCHandler.Instance.SendMessageToClient(this.OutPCs,this.TargetAddr,message);
 	}
 }

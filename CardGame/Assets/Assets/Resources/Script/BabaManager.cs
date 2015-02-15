@@ -262,11 +262,11 @@ public class BabaManager : MonoBehaviour
 			string[] messageData = message.Split('/');
 			foreach (string Data in messageData) 
 			{
-				Debug.Log("messageData["+Data+"]");
+				//Debug.Log("messageData["+Data+"]");
   			}
 
-  			Debug.Log("ユーザ["+messageData[0]+"]による処理を行います");
-  			Debug.Log("処理モード["+messageData[1].ToString()+"]");
+  			//Debug.Log("ユーザ["+messageData[0]+"]による処理を行います");
+  			//Debug.Log("処理モード["+messageData[1].ToString()+"]");
 
   			if(messageData[1].ToString() == "deck")
   			{
@@ -287,11 +287,18 @@ public class BabaManager : MonoBehaviour
 				if(this.CheckDeck() == true)
 				{
 					Debug.Log("Deck同期完了");
+					oscController.sendMessage("send","デッキ構築完了");
 				}
 				else if(this.CheckDeck() == false)
 				{
 					oscController.RequestDeck("RequestDeck");
 				}
+			}
+
+
+			else if(messageData[1].ToString() == "send")
+  			{
+  				Debug.Log("デッキ構築完了[確認]" + messageData[2].ToString());
 			}
   		}
 	}
@@ -316,6 +323,7 @@ public class BabaManager : MonoBehaviour
 	}
 	private bool CheckDeck()
 	{
+		Debug.Log("デッキの確認を行います");
 		foreach(GameObject obj in deck)
 		{
 			if(obj == null)
