@@ -302,13 +302,7 @@ public class BabaManager : MonoBehaviour
 		if(message != null)
 		{
 			string[] messageData = message.Split('/');
-			foreach (string Data in messageData) 
-			{
-				Debug.Log("messageData["+Data+"]");
-  			}
 
-  			//Debug.Log("ユーザ["+messageData[0]+"]による処理を行います");
-  			//Debug.Log("処理モード["+messageData[1].ToString()+"]");
   			if(messageData[0].ToString().Contains("192"))
 			{
 				Debug.Log("OSC接続[確認]");
@@ -347,13 +341,14 @@ public class BabaManager : MonoBehaviour
 	  			{
 	  				Debug.Log("RequestCard該当");
 	  				string number = messageData[2].ToString();
-	 				oscController.sendCard("sendCard",deck[int.Parse(number)]);
+	 				oscController.sendCard("sendCard",deck[int.Parse(number)],int.Parse(number));
 	  			}
 	  			/**
 	  			* 送られたカードの情報からカードの更新する
 	  			**/
 	  			else if(messageData[1].ToString() == "sendCard")
 	  			{  				
+	   				Debug.Log("sendCard該当");
 	  				this.MatchDeck(messageData[2].ToString());
 	  			}
 	  			else if(messageData[1].ToString() == "startGame")
@@ -408,14 +403,13 @@ public class BabaManager : MonoBehaviour
 		stageColor = 0.0f;
 		Debug.Log("デッキの確認を行います");
 
-		int i = 0;
+		int i = 0;bool mode = false;
 
 		foreach(GameObject obj in deck)
 		{
 			if(obj == null)
 			{
 				oscController.RequestCard("RequestCard",i,decklock);
-				return false;
 			}
 			else
 			{
@@ -424,7 +418,8 @@ public class BabaManager : MonoBehaviour
 			i++;
 		}
 		decklock = true;
-		return true;
+		mode = true;
+		return mode;
 	}
 
 	/**

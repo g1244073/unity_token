@@ -84,13 +84,13 @@ public class OSCController : MonoBehaviour
 	/**
 	*　カードの作成のためのメゾット
 	**/
-	public void sendCard(string sys,GameObject card)
+	public void sendCard(string sys,GameObject card,int number)
 	{
-		Debug.Log("sendDeck");
+		Debug.Log("sendCard");
 		int i = 0;
 		string message = thisPC + "/" + sys + "/";
 		Card info = card.GetComponent<Card>();
-		message = message + "." + info.Mark + "." + info.Number + "." ;
+		message = message + number + "." + info.Mark + "." + info.Number + "." ;
 		OSCHandler.Instance.SendMessageToClient(this.OutPCs,this.TargetAddr,message);
 	}
 

@@ -111,9 +111,9 @@ public class OSCHandler : MonoBehaviour
 	public void InitClient(string TargetAddr,int OutGoingPort,string OutPCs)
 	{
 		Debug.Log("-------MakeClient----------");
-		Debug.Log("TargetAddr"+TargetAddr);
-		Debug.Log("OutGoingPort"+OutGoingPort);
-		Debug.Log("Debug:Name["+OutPCs+"]");
+		//Debug.Log("TargetAddr"+TargetAddr);
+		//Debug.Log("OutGoingPort"+OutGoingPort);
+		//Debug.Log("Debug:Name["+OutPCs+"]");
 		this.CreateClient(OutPCs,IPAddress.Parse(TargetAddr),OutGoingPort);
 	}
 	/// <summary>
@@ -122,9 +122,9 @@ public class OSCHandler : MonoBehaviour
 	/// </summary>
 	public void InitServer(string thisPC,int InComingPort)
 	{
-		Debug.Log("-------MakeServer----------");
-		Debug.Log("InComingPort"+InComingPort);
-		Debug.Log("thisPC:"+ thisPC);
+		//Debug.Log("-------MakeServer----------");
+		//Debug.Log("InComingPort"+InComingPort);
+		//Debug.Log("thisPC:"+ thisPC);
 		this.CreateServer(thisPC,InComingPort);	
 	}
 
