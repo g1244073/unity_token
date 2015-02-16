@@ -123,15 +123,26 @@ public class BabaManager : MonoBehaviour
 
 					Start();
 				}
+				/*
+				* 相手のoscサーバに対してクライアントを作成する	
+				*/
 				else if(hit.collider.gameObject.tag == "send" && GameMode == 0)
-				{					
+				{				
+					cardInfo = hit.collider.gameObject;
 					oscController.makeClient();
+					cardInfo.renderer.material.color = new Color(1.0f, 1.0f, 1.0f, 1f);;
 				}
+				/*
+				* デッキをランダムに作成する
+				*/
 				else if(hit.collider.gameObject.tag == "MakeDeck" && GameMode == 0)
 				{
+					cardInfo = hit.collider.gameObject;
 					deck = creatDeck.creatDeck();
+					decklock = true;
 					oscController.sendDeck("deck",deck);
 					GameMode = 1;
+					cardInfo.renderer.material.color = new Color(1.0f, 1.0f, 1.0f, 1f);;
 					Debug.Log("ゲームモードを[開始]に変更");
 				}
 			}
@@ -208,6 +219,7 @@ public class BabaManager : MonoBehaviour
 
 	private void StartGame()
 	{
+		/*
 		Card info;
 		foreach(GameObject obj in deck)
 		{
@@ -218,9 +230,11 @@ public class BabaManager : MonoBehaviour
 				CheckCard(obj);
 			}
 		}
+		*/
 	}
 	private void CheckGame()
 	{
+		/*
 		Card info;
 		int countA=0,countB=0;
 		int countOUT=0;
@@ -243,10 +257,12 @@ public class BabaManager : MonoBehaviour
 			}
 		}
 		Debug.Log("現在のステージの状態,[A:"+countA+"][B:"+countB+"][OUT:"+countOUT+"]");
+		*/
 	}
 
 	private void CheckCard(GameObject obj_search)
 	{
+		/*
 		Card info;
 		Card info_to = obj_search.GetComponent<Card>();
 		foreach(GameObject obj in deck)
@@ -262,7 +278,6 @@ public class BabaManager : MonoBehaviour
 					}
 					else
 					{
-
 						Debug.Log("検索元"+info.Mark+":"+info.Number);
 						Debug.Log("検索対象"+info_to.Mark+":"+info_to.Number);
 						info.CardMode = "OUT";
@@ -273,6 +288,7 @@ public class BabaManager : MonoBehaviour
 				}
 			}
 		}
+		*/
 	}
 	private void ExchangeCard(GameObject obj,string player)
 	{
@@ -282,69 +298,92 @@ public class BabaManager : MonoBehaviour
 	}
 
 	private void GameSystem(string message)
-	{
+	{	
 		if(message != null)
 		{
 			string[] messageData = message.Split('/');
 			foreach (string Data in messageData) 
 			{
-				//Debug.Log("messageData["+Data+"]");
+				Debug.Log("messageData["+Data+"]");
   			}
 
   			//Debug.Log("ユーザ["+messageData[0]+"]による処理を行います");
   			//Debug.Log("処理モード["+messageData[1].ToString()+"]");
+  			if(messageData[0].ToString().Contains("192"))
+			{
+				Debug.Log("OSC接続[確認]");
+			}
+			else
+			{
+  				if(messageData[1].ToString() == "deck")
+  				{
+  					Debug.Log("deck該当");
+  					this.MatchDeck(messageData[2].ToString());
+  					while(decklock == false)
+  					{
+  						this.CheckDeck();
+  					}
+  					/*
+  					if(this.CheckDeck() == true)
+					{
+						Debug.Log("Deck同期完了");
+						decklock = true;
 
-  			if(messageData[1].ToString() == "deck")
-  			{
-  				Debug.Log("deck該当");
-  				MatchDeck(messageData[2].ToString());
-  				if(this.CheckDeck() == true)
-				{
-					Debug.Log("Deck同期完了");
-					decklock = true;
+						//oscController.sendMessage("SendMessage","デッキ構築完了");
+						GameMode = 1;
+						Debug.Log("ゲームモードを[開始]に変更");
+					}
+					else if(this.CheckDeck() == false)
+					{
+						oscController.RequestDeck("RequestDeck",decklock);
+					}
+					Stage.renderer.material.color = new Color(stageColor,stageColor,stageColor, 1f);;
+					*/
+	  			}
+	  			/**
+	  			* 与えられた数字のカードの情報をリクエストする
+	  			**/
+	  			else if(messageData[1].ToString() == "RequestCard")
+	  			{
+	  				Debug.Log("RequestCard該当");
+	  				string number = messageData[2].ToString();
+	 				oscController.sendCard("sendCard",deck[int.Parse(number)]);
+	  			}
+	  			/**
+	  			* 送られたカードの情報からカードの更新する
+	  			**/
+	  			else if(messageData[1].ToString() == "sendCard")
+	  			{  				
+	  				this.MatchDeck(messageData[2].ToString());
+	  			}
+	  			else if(messageData[1].ToString() == "startGame")
+	  			{
+	  				/*
+	  				SetDeck(player_number,deck);
+	  				*/
+	  			}
+	  			else if(messageData[1].ToString() == "updateCard")
+	  			{
+	  				/*
+	  				updateCard(messageData[2].ToString());
+	  				*/
+	  			}
 
-					//oscController.sendMessage("SendMessage","デッキ構築完了");
-					GameMode = 1;
-					Debug.Log("ゲームモードを[開始]に変更");
+	  			/*
+	  			* ------------以下はデバック用の処理---------------
+	  			*/
+				else if(messageData[1].ToString() == "SendMessage")
+	  			{
+	  				Debug.Log("デッキ構築完了[確認]" + messageData[2].ToString());
 				}
-				else if(this.CheckDeck() == false)
-				{
-					oscController.RequestDeck("RequestDeck",decklock);
-				}
-				Stage.renderer.material.color = new Color(stageColor,stageColor,stageColor, 1f);;
-
-
-  			}
-  			else if(messageData[1].ToString() == "send")
-  			{  				
-  				Debug.Log("send該当");
-  				ExchangeCard(messageData[2].ToString());
-  			}
-  			else if(messageData[1].ToString() == "RequestDeck")
-  			{
-  				oscController.sendDeck("deck",deck);
-  			}
-  			else if(messageData[1].ToString() == "RequestCard")
-  			{
-  				string number = messageData[2].ToString();
- 				oscController.updateCard("updateCard",deck[int.Parse(number)]);
-  			}
-  			else if(messageData[1].ToString() == "startGame")
-  			{
-  				SetDeck(player_number,deck);
-  			}
-  			else if(messageData[1].ToString() == "updateCard")
-  			{
-  				updateCard(messageData[2].ToString());
-  			}
-
-
-			else if(messageData[1].ToString() == "SendMessage")
-  			{
-  				Debug.Log("デッキ構築完了[確認]" + messageData[2].ToString());
 			}
   		}
 	}
+
+
+	/**
+	* 初回のデッキの更新
+	**/
 	private void MatchDeck(string message)
 	{
 		Debug.Log("デッキの同期を行います");
@@ -360,32 +399,63 @@ public class BabaManager : MonoBehaviour
 			Debug.Log("すでに更新済みです");
 		}
 	}
-	private void ExchangeCard(string message)
-	{
-		Debug.Log("手札の交換を行います");
-	}
+
+	/**
+	*  デッキが未完な時に対して更新を行う
+	**/
 	private bool CheckDeck()
 	{
 		stageColor = 0.0f;
 		Debug.Log("デッキの確認を行います");
-		bool mode = true;
+
+		int i = 0;
+
 		foreach(GameObject obj in deck)
 		{
 			if(obj == null)
 			{
-				mode = false;
+				oscController.RequestCard("RequestCard",i,decklock);
+				return false;
 			}
 			else
 			{
 				stageColor = stageColor + (1.0f / 53.0f);
 			}
+			i++;
 		}
-		if(mode == false)
-		{
-			return false;
-		}
+		decklock = true;
 		return true;
 	}
+
+	/**
+	* 与えられた情報からカードの更新を行う；
+	**/
+	private void updateCard(string message)
+	{
+		string[] makeDeck = message.Split('.');
+		Debug.Log("マーク["+makeDeck[0]+"]ナンバー["+makeDeck[1]+"]を"+makeDeck[2]+"に変更");
+
+		foreach(GameObject obj in deck)
+		{
+			Card info = obj.GetComponent<Card>();
+			if(info.Mark == int.Parse(makeDeck[0]))
+			{
+				if(info.Number == int.Parse(makeDeck[1]))
+				{
+					info.CardMode = makeDeck[2];
+				}
+			}
+		}
+		Reset();
+	}
+
+
+
+	private void ExchangeCard(string message)
+	{
+		Debug.Log("手札の交換を行います");
+	}
+	
 	private void RequestDeck()
 	{
 		Debug.Log("デッキの確認[null]を行います");
@@ -421,26 +491,6 @@ public class BabaManager : MonoBehaviour
 			return false;
 		}
 		return true;
-	}
-
-
-	private void updateCard(string message)
-	{
-		string[] makeDeck = message.Split('.');
-		Debug.Log("マーク["+makeDeck[0]+"]ナンバー["+makeDeck[1]+"]を"+makeDeck[2]+"に変更");
-
-		foreach(GameObject obj in deck)
-		{
-			Card info = obj.GetComponent<Card>();
-			if(info.Mark == int.Parse(makeDeck[0]))
-			{
-				if(info.Number == int.Parse(makeDeck[1]))
-				{
-					info.CardMode = makeDeck[2];
-				}
-			}
-		}
-		Reset();
 	}
 
 	private void SetDeck(int player_number,GameObject[] deck)
