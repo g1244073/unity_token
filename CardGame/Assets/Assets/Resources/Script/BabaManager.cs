@@ -323,6 +323,10 @@ public class BabaManager : MonoBehaviour
   			{
   				SetDeck(player_number,deck);
   			}
+  			else if(messageData[1].ToString() == "updateCard")
+  			{
+  				updateCard(messageData[2].ToString());
+  			}
 
 
 			else if(messageData[1].ToString() == "SendMessage")
