@@ -298,7 +298,7 @@ public class BabaManager : MonoBehaviour
   				if(this.CheckDeck() == true)
 				{
 					Debug.Log("Deck同期完了");
-					oscController.sendMessage("SendMessage","デッキ構築完了");
+					//oscController.sendMessage("SendMessage","デッキ構築完了");
 					GameMode = 1;
 					Debug.Log("ゲームモードを[開始]に変更");
 				}
@@ -414,6 +414,7 @@ public class BabaManager : MonoBehaviour
 				}
 			}
 		}
+		Reset();
 	}
 
 	private void SetDeck(int player_number,GameObject[] deck)
