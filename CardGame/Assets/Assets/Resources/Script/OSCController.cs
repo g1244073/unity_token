@@ -148,7 +148,7 @@ public class OSCController : MonoBehaviour
 	}
 	
 
-	public void startGame(string sys)
+	public void sendSystem(string sys)
 	{
 		Debug.Log("startGame");
 		string message = thisPC + "/" + sys + "/";

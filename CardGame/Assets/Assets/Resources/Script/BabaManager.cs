@@ -101,12 +101,10 @@ public class BabaManager : MonoBehaviour
 
 					SetDeck(player_number,deck);
 					decklock = true;
-					oscController.startGame("startGame");
+					//oscController.startGame("startGame");
 					StartGame();
 					GameMode = 2;
 					Debug.Log("ゲームモードを[対戦]に変更");
-
-
 				}
 				else if(hit.collider.gameObject.tag == "Card" && GameMode == 2)
 				{
@@ -141,6 +139,7 @@ public class BabaManager : MonoBehaviour
 					deck = creatDeck.creatDeck();
 					decklock = true;
 					oscController.sendDeck("deck",deck);
+					oscController.sendSystem("checkDeck");
 					GameMode = 1;
 					cardInfo.renderer.material.color = new Color(1.0f, 1.0f, 1.0f, 1f);;
 					Debug.Log("ゲームモードを[開始]に変更");
@@ -311,12 +310,8 @@ public class BabaManager : MonoBehaviour
 			{
   				if(messageData[1].ToString() == "deck")
   				{
-  					Debug.Log("deck該当");
+  					Debug.Log("--------------deck該当--------------");
   					this.MatchDeck(messageData[2].ToString());
-  					while(decklock == false)
-  					{
-  						this.CheckDeck();
-  					}
   					/*
   					if(this.CheckDeck() == true)
 					{
@@ -331,8 +326,9 @@ public class BabaManager : MonoBehaviour
 					{
 						oscController.RequestDeck("RequestDeck",decklock);
 					}
-					Stage.renderer.material.color = new Color(stageColor,stageColor,stageColor, 1f);;
 					*/
+					Debug.Log("-----------------------------------");
+
 	  			}
 	  			/**
 	  			* 与えられた数字のカードの情報をリクエストする
@@ -351,6 +347,26 @@ public class BabaManager : MonoBehaviour
 	   				Debug.Log("sendCard該当");
 	  				this.MatchDeck(messageData[2].ToString());
 	  			}
+	  			/**
+	  			*
+	  			**/
+	  			else if(messageData[1].ToString() == "checkDeck")
+	  			{  				
+	   				Debug.Log("checkDeck該当");
+	   				int i = 1;
+  					this.MatchDeck(messageData[2].ToString());
+  					while(decklock == false)
+  					{
+  						Debug.Log("デッキ構築のループ実行中["+i+"]");
+  						this.CheckDeck();
+  						Stage.renderer.material.color = new Color(stageColor,stageColor,stageColor, 1f);
+  						i++;
+  					}
+  					Debug.Log("デッキ構築完了");
+	  			}
+	  			/**
+	  			*
+	  			**/
 	  			else if(messageData[1].ToString() == "startGame")
 	  			{
 	  				/*
@@ -398,7 +414,7 @@ public class BabaManager : MonoBehaviour
 	/**
 	*  デッキが未完な時に対して更新を行う
 	**/
-	private bool CheckDeck()
+	private void CheckDeck()
 	{
 		stageColor = 0.0f;
 		Debug.Log("デッキの確認を行います");
@@ -410,6 +426,9 @@ public class BabaManager : MonoBehaviour
 			if(obj == null)
 			{
 				oscController.RequestCard("RequestCard",i,decklock);
+				Debug.Log("カードの情報がありません");
+				mode = true;
+				break;
 			}
 			else
 			{
@@ -417,9 +436,14 @@ public class BabaManager : MonoBehaviour
 			}
 			i++;
 		}
-		decklock = true;
-		mode = true;
-		return mode;
+		if(mode == true)
+		{
+			decklock = false;
+		}
+		else
+		{
+			decklock = true;
+		}
 	}
 
 	/**
