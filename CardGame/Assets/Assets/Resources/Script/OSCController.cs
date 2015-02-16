@@ -86,7 +86,7 @@ public class OSCController : MonoBehaviour
 	}
 	public void sendDeck(string sys,GameObject[] deck)
 	{
-		Debug.Log("match-deck");
+		Debug.Log("sendDeck");
 		int i = 0;
 		string message;
 		foreach(GameObject obj in deck)
@@ -109,13 +109,24 @@ public class OSCController : MonoBehaviour
 
 		return null;
 	}
-	public void RequestDeck(string sys)
+	public void RequestDeck(string sys,bool deckLock)
 	{
-		Debug.Log("RequestDeck");
-		string message = thisPC + "/" + sys + "/";
-		OSCHandler.Instance.SendMessageToClient(this.OutPCs,this.TargetAddr,message);
+		if(deckLock == false)
+		{
+			Debug.Log("RequestDeck");
+			string message = thisPC + "/" + sys + "/";
+			OSCHandler.Instance.SendMessageToClient(this.OutPCs,this.TargetAddr,message);
+		}
 	}
-
+	public void RequestCard(string sys,int i,bool deckLock)
+	{
+		if(deckLock == false)
+		{
+			Debug.Log("RequestCard");
+			string message = thisPC + "/" + sys + "/" + i + "/";
+			OSCHandler.Instance.SendMessageToClient(this.OutPCs,this.TargetAddr,message);
+		}
+	}
 	public void sendMessage(string sys,string messages)
 	{
 		Debug.Log("send");

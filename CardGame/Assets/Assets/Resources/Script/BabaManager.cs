@@ -38,6 +38,8 @@ public class BabaManager : MonoBehaviour
 
 	public float time;
 
+	private bool decklock = false;
+
 	// Use this for initialization
 	void Start () 
 	
@@ -98,6 +100,7 @@ public class BabaManager : MonoBehaviour
 					cardInfo = hit.collider.gameObject;
 
 					SetDeck(player_number,deck);
+					decklock = true;
 					oscController.startGame("startGame");
 					StartGame();
 					GameMode = 2;
@@ -181,7 +184,7 @@ public class BabaManager : MonoBehaviour
 			*/
 			else if(info.CardMode == "OUT")
 			{
-				v.x = (float)(-60.0f);
+				v.x = (float)(-55.0f);
 				v.y = (float)(0.1f);
 				v.z = (float)(0.0f);
 			}
@@ -298,13 +301,15 @@ public class BabaManager : MonoBehaviour
   				if(this.CheckDeck() == true)
 				{
 					Debug.Log("Deck同期完了");
+					decklock = true;
+
 					//oscController.sendMessage("SendMessage","デッキ構築完了");
 					GameMode = 1;
 					Debug.Log("ゲームモードを[開始]に変更");
 				}
 				else if(this.CheckDeck() == false)
 				{
-					oscController.RequestDeck("RequestDeck");
+					oscController.RequestDeck("RequestDeck",decklock);
 				}
 				Stage.renderer.material.color = new Color(stageColor,stageColor,stageColor, 1f);;
 
@@ -318,6 +323,11 @@ public class BabaManager : MonoBehaviour
   			else if(messageData[1].ToString() == "RequestDeck")
   			{
   				oscController.sendDeck("deck",deck);
+  			}
+  			else if(messageData[1].ToString() == "RequestCard")
+  			{
+  				string number = messageData[2].ToString();
+ 				oscController.updateCard("updateCard",deck[int.Parse(number)]);
   			}
   			else if(messageData[1].ToString() == "startGame")
   			{
@@ -376,6 +386,21 @@ public class BabaManager : MonoBehaviour
 		}
 		return true;
 	}
+	private void RequestDeck()
+	{
+		Debug.Log("デッキの確認[null]を行います");
+		int i = 0;
+		while(decklock == false)
+		{
+			foreach(GameObject obj in deck)
+			{
+				if(obj == null)
+				{
+					oscController.RequestCard("RequestCard",i,decklock);
+				}
+			}
+		}
+	}
 
 	private bool CheckDeck_mode()
 	{
@@ -402,6 +427,8 @@ public class BabaManager : MonoBehaviour
 	private void updateCard(string message)
 	{
 		string[] makeDeck = message.Split('.');
+		Debug.Log("マーク["+makeDeck[0]+"]ナンバー["+makeDeck[1]+"]を"+makeDeck[2]+"に変更");
+
 		foreach(GameObject obj in deck)
 		{
 			Card info = obj.GetComponent<Card>();
@@ -409,7 +436,6 @@ public class BabaManager : MonoBehaviour
 			{
 				if(info.Number == int.Parse(makeDeck[1]))
 				{
-					Debug.Log("マーク["+info.Mark+"]ナンバー["+info.Number+"]を"+makeDeck[2]+"に変更");
 					info.CardMode = makeDeck[2];
 				}
 			}
