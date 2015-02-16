@@ -79,6 +79,7 @@ public class OSCController : MonoBehaviour
 			OSCHandler.Instance.SendMessageToClient(this.OutPCs,this.TargetAddr,message);
 			i++;
 		}
+		this.sendSystem("checkDeck");
 	}
 
 	/**

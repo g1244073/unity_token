@@ -139,7 +139,6 @@ public class BabaManager : MonoBehaviour
 					deck = creatDeck.creatDeck();
 					decklock = true;
 					oscController.sendDeck("deck",deck);
-					oscController.sendSystem("checkDeck");
 					GameMode = 1;
 					cardInfo.renderer.material.color = new Color(1.0f, 1.0f, 1.0f, 1f);;
 					Debug.Log("ゲームモードを[開始]に変更");
@@ -308,27 +307,19 @@ public class BabaManager : MonoBehaviour
 			}
 			else
 			{
+				/**
+				* デッキの更新を行う
+				**/
   				if(messageData[1].ToString() == "deck")
   				{
-  					Debug.Log("--------------deck該当--------------");
   					this.MatchDeck(messageData[2].ToString());
-  					/*
-  					if(this.CheckDeck() == true)
-					{
-						Debug.Log("Deck同期完了");
-						decklock = true;
-
-						//oscController.sendMessage("SendMessage","デッキ構築完了");
-						GameMode = 1;
-						Debug.Log("ゲームモードを[開始]に変更");
-					}
-					else if(this.CheckDeck() == false)
-					{
-						oscController.RequestDeck("RequestDeck",decklock);
-					}
-					*/
-					Debug.Log("-----------------------------------");
-
+	  			}
+	  			/**
+				* デッキの更新を行う
+				**/
+  				else if(messageData[1].ToString() == "checkDeck")
+  				{
+  					this.CheckDeck();
 	  			}
 	  			/**
 	  			* 与えられた数字のカードの情報をリクエストする
@@ -350,20 +341,6 @@ public class BabaManager : MonoBehaviour
 	  			/**
 	  			*
 	  			**/
-	  			else if(messageData[1].ToString() == "checkDeck")
-	  			{  				
-	   				Debug.Log("checkDeck該当");
-	   				int i = 1;
-  					this.MatchDeck(messageData[2].ToString());
-  					while(decklock == false)
-  					{
-  						Debug.Log("デッキ構築のループ実行中["+i+"]");
-  						this.CheckDeck();
-  						Stage.renderer.material.color = new Color(stageColor,stageColor,stageColor, 1f);
-  						i++;
-  					}
-  					Debug.Log("デッキ構築完了");
-	  			}
 	  			/**
 	  			*
 	  			**/
@@ -419,31 +396,41 @@ public class BabaManager : MonoBehaviour
 		stageColor = 0.0f;
 		Debug.Log("デッキの確認を行います");
 
-		int i = 0;bool mode = false;
+		Debug.Log("checkDeck該当");
+	   	int i = 1;
+	   	int m = 0;bool mode = false;
 
-		foreach(GameObject obj in deck)
-		{
-			if(obj == null)
+  		while(decklock == false)
+  		{
+  			Debug.Log("デッキ構築のループ実行中["+i+"]");
+
+			foreach(GameObject obj in deck)
 			{
-				oscController.RequestCard("RequestCard",i,decklock);
-				Debug.Log("カードの情報がありません");
-				mode = true;
-				break;
+				if(obj == null)
+				{
+					oscController.RequestCard("RequestCard",m,decklock);
+					Debug.Log("カードの情報がありません");
+					mode = true;
+					break;
+				}
+				else
+				{
+					stageColor = stageColor + (1.0f / 53.0f);
+				}
+				m++;
+			}
+			if(mode == true)
+			{
+				decklock = false;
 			}
 			else
 			{
-				stageColor = stageColor + (1.0f / 53.0f);
+				decklock = true;
 			}
+			Stage.renderer.material.color = new Color(stageColor,stageColor,stageColor, 1f);
 			i++;
-		}
-		if(mode == true)
-		{
-			decklock = false;
-		}
-		else
-		{
-			decklock = true;
-		}
+  		}
+  		Debug.Log("デッキの確認を完了しました");
 	}
 
 	/**
