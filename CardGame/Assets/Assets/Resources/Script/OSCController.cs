@@ -131,5 +131,12 @@ public class OSCController : MonoBehaviour
 		OSCHandler.Instance.SendMessageToClient(this.OutPCs,this.TargetAddr,message);
 	}
 
+	public void startGame(string sys)
+	{
+		Debug.Log("startGame");
+		string message = thisPC + "/" + sys + "/";
+		OSCHandler.Instance.SendMessageToClient(this.OutPCs,this.TargetAddr,message);
+	}
+
 
 }

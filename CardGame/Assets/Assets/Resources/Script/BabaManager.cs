@@ -98,6 +98,7 @@ public class BabaManager : MonoBehaviour
 					cardInfo = hit.collider.gameObject;
 
 					SetDeck(player_number,deck);
+					oscController.startGame("startGame");
 					StartGame();
 					GameMode = 2;
 					Debug.Log("ゲームモードを[対戦]に変更");
@@ -318,7 +319,7 @@ public class BabaManager : MonoBehaviour
   			{
   				oscController.sendDeck("deck",deck);
   			}
-  			else if(messageData[1].ToString() == "updateCard")
+  			else if(messageData[1].ToString() == "startGame")
   			{
   				SetDeck(player_number,deck);
   			}
