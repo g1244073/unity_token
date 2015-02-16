@@ -97,8 +97,6 @@ public class OSCController : MonoBehaviour
 			OSCHandler.Instance.SendMessageToClient(this.OutPCs,this.TargetAddr,message);
 			i++;
 		}
-		this.CheckDeck("CheckDeck");
-		
 	}
 
 	public string catchMessage()
@@ -117,12 +115,6 @@ public class OSCController : MonoBehaviour
 		string message = thisPC + "/" + sys + "/";
 		OSCHandler.Instance.SendMessageToClient(this.OutPCs,this.TargetAddr,message);
 	}
-	public void CheckDeck(string sys)
-	{
-		Debug.Log("CheckDeck");
-		string message = thisPC + "/"+sys+"/"; 
-		OSCHandler.Instance.SendMessageToClient(this.OutPCs,this.TargetAddr,message);
-	}
 
 	public void sendMessage(string sys,string messages)
 	{
@@ -130,4 +122,14 @@ public class OSCController : MonoBehaviour
 		string message = thisPC + "/"+sys+"/"+ messages; 
 		OSCHandler.Instance.SendMessageToClient(this.OutPCs,this.TargetAddr,message);
 	}
+	public void updateCard(string sys,GameObject card)
+	{
+		Debug.Log("updateCard");
+		Card info = card.GetComponent<Card>();	
+		string message = thisPC + "/" + sys + "/";
+		message = message + info.Mark + "." + info.Number + "." + info.CardMode + ".";
+		OSCHandler.Instance.SendMessageToClient(this.OutPCs,this.TargetAddr,message);
+	}
+
+
 }

@@ -32,13 +32,19 @@ public class BabaManager : MonoBehaviour
 
     public Canvas canvas;
 
+    public float stageColor = 0;
+
     public int GameMode = 0;
+
+	public float time;
+
 	// Use this for initialization
 	void Start () 
 	
 	{
 		Debug.Log("PvPババ抜きの準備開始");
 		Debug.Log("ゲームモードを[準備]に変更");
+		Stage.renderer.material.color = new Color(0.0f, 0.0f, 0.0f, 1f);;
 
 
 		//-----------------OSCの環境を構築----------------
@@ -48,11 +54,14 @@ public class BabaManager : MonoBehaviour
 		//----------------------------------------------
 		creatDeck = DeckController.GetComponent<CreatDeck> ();
 
+		time = 0.0f;
+
 		deck = new GameObject[53];
 	}
 	// Update is called once per frame
 	void Update () 
 	{
+		time += Time.deltaTime;
 
 		//OSCのアップデート	
 		oscController.UpdateOSC();
@@ -87,11 +96,15 @@ public class BabaManager : MonoBehaviour
 					Debug.Log("card認識");
 					
 					cardInfo = hit.collider.gameObject;
-					//Card info = cardInfo.GetComponent<Card>();
 
-					oscController.sendMessage("send",cardInfo,OutPC);
+					SetDeck(player_number,deck);
+					StartGame();
+					GameMode = 2;
+					Debug.Log("ゲームモードを[対戦]に変更");
+
+
 				}
-				else if(hit.collider.gameObject.tag == "make")
+				else if(hit.collider.gameObject.tag == "Card" && GameMode == 2)
 				{
 
 				}
@@ -122,31 +135,34 @@ public class BabaManager : MonoBehaviour
 	}
 	private void Reset()
 	{
-		int i=0,j=0,m=0;
 		Card info;
-
 		//ステーズのサイズを獲得
-		float StageX = Stage.transform.position.x;
-		float StageZ = Stage.transform.position.z;
+		Vector3 stage_v  = Stage.transform.localScale;
+
+		int countA=0,countB=0;
 
 		foreach(GameObject obj in deck)
 		{
 			info = obj.GetComponent<Card>();
 			Vector3 v = obj.transform.localPosition;
+			//Debug.Log(stage_v.x);
+
 			if(info.CardMode == "A")
 			{
-				v.x = (float)(5*j+StageX - 50);
-				v.y = (float)(5);
-				v.z = (float)(StageZ-45);
-				j++;
+				v.x = (float)(-(stage_v.x/2) + 2.5 + countA*4);
+				v.y = (float)(5.0f);
+				v.z = (float)(-(stage_v.z/2));
+				countA++;
 			}
+			
 			else if(info.CardMode == "B")
 			{
-				v.x = (float)(5*m+StageX - 50);
-				v.y = (float)(5);
-				v.z = (float)(StageZ+45);
-				m++;
+				v.x = (float)(-(stage_v.x/2) + 2.5 + countB*4);
+				v.y = (float)(5.0f);
+				v.z = (float)((stage_v.z/2));
+				countB++;
 			}
+			/*
 			else if(info.CardMode == "C")
 			{
 				v.x = (float)(5*m+StageX - 50);
@@ -161,14 +177,17 @@ public class BabaManager : MonoBehaviour
 				v.z = (float)(StageZ+45);
 				m++;
 			}
+			*/
 			else if(info.CardMode == "OUT")
 			{
 				v.x = (float)(-60.0f);
 				v.y = (float)(0.1f);
 				v.z = (float)(0.0f);
 			}
-		info.MoveCard(obj,v,info.CardMode);
-		i++;
+			StartCoroutine(waitTime(100));
+
+			info.D_MoveCard(obj,v);
+
 		}
 	}
 
@@ -190,11 +209,7 @@ public class BabaManager : MonoBehaviour
 		{
 			info = obj.GetComponent<Card>();
 			//Debug.Log("カードチェック"+info.CardMode);
-			if(info.CardMode == "A")
-			{
-				CheckCard(obj);
-			}
-			else if(info.CardMode == "B")
+			if(info.CardMode == MyPC)
 			{
 				CheckCard(obj);
 			}
@@ -243,11 +258,12 @@ public class BabaManager : MonoBehaviour
 					}
 					else
 					{
+
 						Debug.Log("検索元"+info.Mark+":"+info.Number);
 						Debug.Log("検索対象"+info_to.Mark+":"+info_to.Number);
 						info.CardMode = "OUT";
-						creatDeck = DeckController.GetComponent<CreatDeck> ();
-						creatDeck.setCard(obj);
+						oscController.updateCard("updateCard",obj_search);
+						Reset();
 						break;
 					}
 				}
@@ -278,6 +294,20 @@ public class BabaManager : MonoBehaviour
   			{
   				Debug.Log("deck該当");
   				MatchDeck(messageData[2].ToString());
+  				if(this.CheckDeck() == true)
+				{
+					Debug.Log("Deck同期完了");
+					oscController.sendMessage("SendMessage","デッキ構築完了");
+					GameMode = 1;
+					Debug.Log("ゲームモードを[開始]に変更");
+				}
+				else if(this.CheckDeck() == false)
+				{
+					oscController.RequestDeck("RequestDeck");
+				}
+				Stage.renderer.material.color = new Color(stageColor,stageColor,stageColor, 1f);;
+
+
   			}
   			else if(messageData[1].ToString() == "send")
   			{  				
@@ -288,21 +318,10 @@ public class BabaManager : MonoBehaviour
   			{
   				oscController.sendDeck("deck",deck);
   			}
-  			else if(messageData[1].ToString() == "CheckDeck")
+  			else if(messageData[1].ToString() == "updateCard")
   			{
-				if(this.CheckDeck() == true)
-				{
-					Debug.Log("Deck同期完了");
-					oscController.sendMessage("SendMessage","デッキ構築完了");
-					GameMode = 1;
-					Debug.Log("ゲームモードを[開始]に変更");
-
-				}
-				else if(this.CheckDeck() == false)
-				{
-					oscController.RequestDeck("RequestDeck");
-				}
-			}
+  				SetDeck(player_number,deck);
+  			}
 
 
 			else if(messageData[1].ToString() == "SendMessage")
@@ -319,7 +338,7 @@ public class BabaManager : MonoBehaviour
 		if(deck[int.Parse(makeDeck[0])] == null)
 		{
 			Debug.Log("新規のカードデータです");
-			deck[int.Parse(makeDeck[0])] = creatDeck.makeCard(int.Parse(makeDeck[1]),int.Parse(makeDeck[2]));
+			deck[int.Parse(makeDeck[0])] = creatDeck.makeCard(int.Parse(makeDeck[1]),int.Parse(makeDeck[2]),int.Parse(makeDeck[0]));
 		}
 		else
 		{
@@ -332,14 +351,115 @@ public class BabaManager : MonoBehaviour
 	}
 	private bool CheckDeck()
 	{
+		stageColor = 0.0f;
 		Debug.Log("デッキの確認を行います");
+		bool mode = true;
 		foreach(GameObject obj in deck)
 		{
 			if(obj == null)
 			{
-				return false;
+				mode = false;
+			}
+			else
+			{
+				stageColor = stageColor + (1.0f / 53.0f);
 			}
 		}
+		if(mode == false)
+		{
+			return false;
+		}
 		return true;
-	}	
+	}
+
+	private bool CheckDeck_mode()
+	{
+		Debug.Log("デッキの確認を行います");
+		bool mode = true;
+		foreach(GameObject obj in deck)
+		{
+			Card info = obj.GetComponent<Card>();
+
+			if(info.CardMode == "DECK")
+			{
+				mode = false;
+				break;
+			}
+		}
+		if(mode == false)
+		{
+			return false;
+		}
+		return true;
+	}
+
+
+	private void updateCard(string message)
+	{
+		string[] makeDeck = message.Split('.');
+		foreach(GameObject obj in deck)
+		{
+			Card info = obj.GetComponent<Card>();
+			if(info.Mark == int.Parse(makeDeck[0]))
+			{
+				if(info.Number == int.Parse(makeDeck[1]))
+				{
+					Debug.Log("マーク["+info.Mark+"]ナンバー["+info.Number+"]を"+makeDeck[2]+"に変更");
+					info.CardMode = makeDeck[2];
+				}
+			}
+		}
+	}
+
+	private void SetDeck(int player_number,GameObject[] deck)
+	{
+		Card info;
+		int i = 0;
+
+		foreach(GameObject obj in deck)
+		{
+			info = obj.GetComponent<Card>();
+			obj.renderer.material.color = Color.white;
+
+			if(player_number == 2)
+			{
+				if(i % player_number == 0)
+				{
+
+					info.CardMode = "A";
+				}
+				else 
+				{
+					info.CardMode = "B";
+				}
+			}
+			else if(player_number == 4)
+			{
+				if(i % player_number == 0)
+				{
+					info.CardMode = "A";
+				}
+				else if(i % player_number == 1)
+				{
+					info.CardMode = "B";
+				}
+				else if(i % player_number == 2)
+				{
+					info.CardMode = "C";
+				}
+				else 
+				{
+					info.CardMode = "D";
+				}
+			}
+			i++;
+		}
+		Reset();
+	}
+	private IEnumerator waitTime(int time)
+	{
+		Debug.Log("処理中");
+  	  yield return new WaitForSeconds ((float)time);
+	}
+
 }

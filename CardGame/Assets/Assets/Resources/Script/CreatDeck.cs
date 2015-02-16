@@ -25,6 +25,8 @@ public class CreatDeck:MonoBehaviour
 
  	private Texture2D TEX_JOKER;
 
+ 	private bool TexturesTrue = false;
+
 	public GameObject[] creatDeck()
 	{		
 		//カードのリソースを読み込む
@@ -342,73 +344,14 @@ public class CreatDeck:MonoBehaviour
 		}
 	}
 
-	public void SetDeck(int player_number,string player_name)
-	{
-		Card info;
-		int i = 0;
-
-		foreach(GameObject obj in deck)
-		{
-			info = obj.GetComponent<Card>();
-			obj.renderer.material.color = Color.white;
-
-			if(player_number == 2)
-			{
-				if(i % player_number == 0)
-				{
-
-					info.CardMode = "A";
-					if(player_name == info.CardMode)
-					{
-						info.reverCard = true;
-
-					}
-					else
-					{
-						info.reverCard = false;
-					}
-				}
-				else 
-				{
-					info.CardMode = "B";
-					if(player_name == info.CardMode)
-					{
-						info.reverCard = true;
-					}
-					else
-					{
-						info.reverCard = false;
-					}
-				}
-			}
-			else if(player_number == 4)
-			{
-				if(i % player_number == 0)
-				{
-					info.CardMode = "A";
-				}
-				else if(i % player_number == 1)
-				{
-					info.CardMode = "B";
-				}
-				else if(i % player_number == 2)
-				{
-					info.CardMode = "C";
-				}
-				else 
-				{
-					info.CardMode = "D";
-				}
-			}
-			i++;
-		}
-	}
+	
+	/*
 	public void setCard(GameObject card)
 	{
 		Card info = card.GetComponent<Card>();
 		if(info.CardMode == "A")
 		{
-			info.SetCard(card,StageA);
+			//info.SetCard(card,StageA);
 			info.CardMode = "OUT";
 		}
 		else if(info.CardMode == "B")
@@ -421,6 +364,7 @@ public class CreatDeck:MonoBehaviour
 			info.SetCard(card,StageOUT);
 		}
 	}
+	*/
 	public void setTex()
 	{
 		Textures_c = new Texture2D[14];
@@ -455,15 +399,44 @@ public class CreatDeck:MonoBehaviour
 			}
 		}
 		TEX_JOKER = Resources.Load(TEXNAME_JOKER) as Texture2D;
+
+		TexturesTrue = true;
 	}
 
-	public GameObject makeCard(int mark,int number)
+	public GameObject makeCard(int mark,int number,int count)
 	{
+		if(TexturesTrue == false)
+		{
+			setTex();
+		}
 		GameObject cardobj = (GameObject)Instantiate(Card);
 		Card info = cardobj.GetComponent<Card>();
+		info.CardMode = "DECK";
 		info.Mark = mark;
 		info.Number = number;
+		if(info.Mark == 1)
+		{
+			info.cardTex = Textures_c[info.Number];
+		}
+		else if(info.Mark == 2)
+		{
+			info.cardTex = Textures_d[info.Number];
+		}
+		else if(info.Mark == 3)
+		{
+			info.cardTex = Textures_h[info.Number];
+		}
+		else if(info.Mark == 4)
+		{
+			info.cardTex = Textures_s[info.Number];
+		}
+		else if(info.Mark == 0)
+		{
+			info.cardTex = TEX_JOKER;
+		}
 
+		cardobj.transform.position = new Vector3(0.0f,(float)(count*0.1),0.0f);
+		cardobj.renderer.material.mainTexture = info.cardTex;
 		return cardobj;
 	}
 }
