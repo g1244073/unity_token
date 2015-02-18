@@ -128,7 +128,7 @@ public class GameManager : MonoBehaviour
 		this.gameSystem(message);
 		//------------------------------------------------------
 		//Gameコンポーネントの更新
-		if(osc_text.text == "OK")
+		if(osc_text.text == "○")
 		{
 			gameComponent.updateGame(message);
 		}

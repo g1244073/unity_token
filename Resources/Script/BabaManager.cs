@@ -19,8 +19,6 @@ public class BabaManager : MonoBehaviour
 
 	public int player_number = 2;
 
-    public Text helper;
-
 	private bool CheckDeck_mode = false;
 
 	private bool myturn = false;
@@ -60,15 +58,14 @@ public class BabaManager : MonoBehaviour
 			{
 				if(((hit.collider.gameObject.tag == "Card") ||(hit.collider.gameObject.tag == "ReveredCard")) && gameComponent.GameMode == 2)
 				{
-					//------------UI表示-------------------
-					gameComponent.writeText(null,helper);
-					//-------------------------------------
 					Debug.Log("card認識");
 					cardInfo = hit.collider.gameObject;
 					gameComponent.setDeck(player_number,gameComponent.deck);
-					//oscController.sendSystem("startGame");
+					gameComponent.waitTime(100);
+					gameComponent.sendSystem("startGame");
 					StartGame();
-					//oscController.sendSystem("ResetGame");
+					gameComponent.waitTime(100);
+					gameComponent.sendSystem("ResetGame");
 					gameComponent.GameMode = 3;
 					Debug.Log("ゲームモードを[対戦]に変更");
 				}
@@ -162,7 +159,6 @@ public class BabaManager : MonoBehaviour
 	private void StartGame()
 	{
 		//--------------------UI表示--------------
-		gameComponent.writeText(null,helper);
 		gameComponent.writeText("カード配布&整理中",gameComponent.main_text);
 		//----------------------------------------
 		foreach(GameObject obj in gameComponent.deck)
@@ -198,7 +194,9 @@ public class BabaManager : MonoBehaviour
 						//Debug.Log("検索対象"+info_to.Mark+":"+info_to.Number);
 						info.CardMode = "OUT";
 						info_to.CardMode = "OUT";
+						gameComponent.waitTime(100);
 						gameComponent.updateCard("updateCard",obj_search);
+						gameComponent.waitTime(100);
 						gameComponent.updateCard("updateCard",obj);
 						gameComponent.reset();
 						break;

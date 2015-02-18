@@ -74,7 +74,7 @@ public class OSCController : MonoBehaviour
 	**/
 	public void oscSendMessege(string message)
 	{
-		this.waitTime(100);
+		this.waitTime(10);
 		OSCHandler.Instance.SendMessageToClient(this.OutPCs,this.TargetAddr,message);
 	}
 }
