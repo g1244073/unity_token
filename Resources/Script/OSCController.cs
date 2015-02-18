@@ -51,43 +51,8 @@ public class OSCController : MonoBehaviour
 		CreateClient = true;
 	}
 	/**
-	* デッキの配列の順番からカードの情報をリクエストするためのメゾット	
+	* OSCによって取得したメッセージを応答する
 	**/
-	public void RequestCard(string sys,int i,bool deckLock)
-	{
-		if(deckLock == false)
-		{
-			Debug.Log("RequestCard");
-			string message = thisPC + "/" + sys + "/" + i + "/";
-			StartCoroutine("waitTime");
-
-			OSCHandler.Instance.SendMessageToClient(this.OutPCs,this.TargetAddr,message);
-		}
-	}
-	/**
-	* デッキのカードの更新を行うためのメゾット
-	**/
-	public void updateCard(string sys,GameObject card)
-	{
-		StartCoroutine("waitTime");
-
-		Debug.Log("updateCard");
-		Card info = card.GetComponent<Card>();	
-		string message = thisPC + "/" + sys + "/";
-		message = message + info.Mark + "." + info.Number + "." + info.CardMode + ".";
-		OSCHandler.Instance.SendMessageToClient(this.OutPCs,this.TargetAddr,message);
-	}
-	/**
-	* 手札のカードの交換を行うためのメゾット
-	**/
-	public void exchange(string sys,GameObject card)
-	{
-		Debug.Log("exchange");
-		Card info = card.GetComponent<Card>();	
-		string message = thisPC + "/" + sys + "/";
-		message = message + info.Mark + "." + info.Number + "." + info.CardMode + ".";
-		OSCHandler.Instance.SendMessageToClient(this.OutPCs,this.TargetAddr,message);
-	}
 	public string catchMessage()
 	{
 		if((saveString != OSCHandler.Instance.getLastPacket() || saveString == null) )
@@ -97,32 +62,19 @@ public class OSCController : MonoBehaviour
 		}
 		return null;
 	}
-	public void RequestDeck(string sys,bool deckLock)
+	/**
+	* 一定時間作業を停止する
+	**/
+	private void waitTime(int time)
 	{
-		if(deckLock == false)
-		{
-			Debug.Log("RequestDeck");
-			string message = thisPC + "/" + sys + "/";
-			OSCHandler.Instance.SendMessageToClient(this.OutPCs,this.TargetAddr,message);
-		}
+		System.Threading.Thread.Sleep(time);
 	}
-	
-	public void sendMessage(string sys,string messages)
-	{
-		Debug.Log("send");
-		string message = thisPC + "/"+sys+"/"+ messages; 
-		OSCHandler.Instance.SendMessageToClient(this.OutPCs,this.TargetAddr,message);
-	}
-
-	private void waitTime()
-	{
-		Debug.Log("--------------処理中----------------");
-		System.Threading.Thread.Sleep(1);
-		Debug.Log("--------------処理終了----------------");
-	}
-
+	/**
+	* OSCにメッセージを取得する
+	**/
 	public void oscSendMessege(string message)
 	{
+		this.waitTime(100);
 		OSCHandler.Instance.SendMessageToClient(this.OutPCs,this.TargetAddr,message);
 	}
 }

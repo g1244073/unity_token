@@ -171,7 +171,7 @@ public class GameManager : MonoBehaviour
 					CreatDeck deckComponent = DeckController.GetComponent<CreatDeck> ();
 					deck = deckComponent.creatDeck();
 					deckLock = true;
-					//oscController.sendDeck("deck",deck);
+					this.sendDeck("deck",deck);
 
 					//ゲームのモードを変更する
 					GameMode = 2;
@@ -223,7 +223,7 @@ public class GameManager : MonoBehaviour
 		System.Threading.Thread.Sleep(time);
 	}
 	//-----------------------------------------------------------------
-	private void setDeck(int player_number,GameObject[] deck)
+	public void setDeck(int player_number,GameObject[] deck)
 	{
 		int i = 0;
 		foreach(GameObject obj in deck)
@@ -263,12 +263,12 @@ public class GameManager : MonoBehaviour
 			}
 			i++;
 		}
-		Reset();
+		reset();
 	}
 	/**
 	* カードの位置を調整する
 	**/
-	private void Reset()
+	public void reset()
 	{
 		//ステーズのサイズを獲得
 		GameObject Stage = GameObject.Find("Stage");
@@ -439,7 +439,7 @@ public class GameManager : MonoBehaviour
 	/**
 	* 与えられた情報からカードの更新を行う；
 	**/
-	private GameObject updateCard(string message)
+	public GameObject updateCard(string message)
 	{
 		GameObject obj_save = null;
 		string[] makeDeck = message.Split('.');
@@ -457,7 +457,7 @@ public class GameManager : MonoBehaviour
 				}
 			}
 		}
-		Reset();
+		reset();
 		return obj_save;
 	}
 	//--------------------------OSCに通信を送るための準備---------------
@@ -513,5 +513,27 @@ public class GameManager : MonoBehaviour
 			string message = MyPC + "/" + sys + "/" + i + "/";
 			oscComponent.oscSendMessege(message);		
 		}
+	}
+	/**
+	* デッキのカードの更新を行うためのメゾット
+	**/
+	public void updateCard(string sys,GameObject card)
+	{
+		Debug.Log("updateCard");
+		OSCController oscComponent = OSC.GetComponent<OSCController> ();
+		Card info = card.GetComponent<Card>();	
+		string message = MyPC + "/" + sys + "/";
+		message = message + info.Mark + "." + info.Number + "." + info.CardMode + ".";
+		oscComponent.oscSendMessege(message);		
+	}
+	/**
+	* OSCデバック用のメゾット
+	**/
+	public void sendMessage(string sys,string messages)
+	{
+		Debug.Log("send");
+		OSCController oscComponent = OSC.GetComponent<OSCController> ();
+		string message = MyPC + "/"+sys+"/"+ messages; 
+		oscComponent.oscSendMessege(message);		
 	}
 }

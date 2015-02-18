@@ -21,8 +21,6 @@ public class BabaManager : MonoBehaviour
 
     public Text helper;
 
-    private float stageColor = 0;
-
 	private bool CheckDeck_mode = false;
 
 	private bool myturn = false;
@@ -50,56 +48,49 @@ public class BabaManager : MonoBehaviour
 	}
 	public void updateGame (string message) 
 	{
-		/*
 		GameSystem(message);
 		//マウスによる操作
 		if(Input.GetMouseButtonDown(0))
 		{
-
 			GameObject cardInfo;
 			Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 			RaycastHit hit;
 
 			if(Physics.Raycast(ray,out hit))
 			{
-
-				if(((hit.collider.gameObject.tag == "Card") ||(hit.collider.gameObject.tag == "ReveredCard")) && GameMode == 1)
+				if(((hit.collider.gameObject.tag == "Card") ||(hit.collider.gameObject.tag == "ReveredCard")) && gameComponent.GameMode == 2)
 				{
-					//------------UI表示----------
-					writeText(null,helper);
-					//---------------------------
-
+					//------------UI表示-------------------
+					gameComponent.writeText(null,helper);
+					//-------------------------------------
 					Debug.Log("card認識");
 					cardInfo = hit.collider.gameObject;
-					SetDeck(player_number,deck);
-					decklock = true;
+					gameComponent.setDeck(player_number,gameComponent.deck);
 					//oscController.sendSystem("startGame");
-					waitTime(1000);
 					StartGame();
 					//oscController.sendSystem("ResetGame");
-					GameMode = 2;
+					gameComponent.GameMode = 3;
 					Debug.Log("ゲームモードを[対戦]に変更");
 				}
-				else if(hit.collider.gameObject.tag == "ReveredCard" && GameMode == 2)
+				else if(hit.collider.gameObject.tag == "ReveredCard" && gameComponent.GameMode == 3)
 				{
 					Debug.Log("Reveredcard認識");
 					GameObject  parent =  hit.collider.transform.parent.gameObject;
-
 					if(myturn == true)
 					{
 						Card info = parent.GetComponent<Card>();
 						Debug.Log("カードの持ち主["+info.CardMode+"]");
-						if(info.CardMode == OutPC)
+						if(info.CardMode == gameComponent.OutPC)
 						{
 							Debug.Log("自分の処理を実行します");
-							info.CardMode = MyPC;
-							Reset();
-							waitTime(1000);
-							//oscController.exchange("exchange",parent);
+							info.CardMode = gameComponent.MyPC;
+							gameComponent.reset();
+							this.exchange("exchange",parent);
 							myturn = false;
 						}
 					}
 				}
+				/*
 				else if(hit.collider.gameObject.tag == "Restart" && (GameMode == 1 || GameMode == 2))
 				{					
 					GameObject[] objs = GameObject.FindGameObjectsWithTag("Card");
@@ -108,55 +99,22 @@ public class BabaManager : MonoBehaviour
 						Destroy(obj);
 					}
 					CheckClear();
-
 					//Start();
 				}
-				//相手のoscサーバに対してクライアントを作成する	
-				
-				else if(hit.collider.gameObject.tag == "send" && GameMode == 0)
-				{
-					cardInfo = hit.collider.gameObject;
-					//oscController.makeClient();
-					cardInfo.renderer.material.color = new Color(1.0f, 1.0f, 1.0f, 1f);
-					//-----------------UIの表示---------------
-					writeText("GameMode["+GameMode+"]",main);
-					writeText("○",osc);
-					writeText("↑",create);
-					//----------------------------------------
-				}
-				
-				//デッキをランダムに作成する
-				
-				else if(hit.collider.gameObject.tag == "MakeDeck" && GameMode == 0)
-				{
-					cardInfo = hit.collider.gameObject;
-					//deck = creatDeck.creatDeck();
-					decklock = true;
-					//oscController.sendDeck("deck",deck);
-					GameMode = 1;
-					cardInfo.renderer.material.color = new Color(1.0f, 1.0f, 1.0f, 1f);;
-					Debug.Log("ゲームモードを[開始]に変更");
-					//-----------------UIの表示---------------
-					writeText("Deck作成完了",main);
-					writeText("○",osc);
-					writeText("○",create);
-					writeText("↓",helper);
-					//----------------------------------------
-				}
+				*/
 			}
 		}
 
-		if(GameMode == 2 && myturn == false)
+		if(gameComponent.GameMode == 3 && myturn == false)
 		{
 			Debug.Log("相手の処理を待っています");
-			writeText("RIVALTURN",main);
+			gameComponent.writeText("RIVALTURN",gameComponent.main_text);
 		}
-		else if(GameMode == 2 && myturn == true)
+		else if(gameComponent.GameMode == 3 && myturn == true)
 		{
 			Debug.Log("自分の処理を待っています");
-			writeText("YOURTURN",main);
+			gameComponent.writeText("YOURTURN",gameComponent.main_text);
 		}
-		*/
 	}
 	public void checkGame()
 	{
@@ -187,9 +145,9 @@ public class BabaManager : MonoBehaviour
 		}
 		Debug.Log("現在のステージの状態,[A:"+countA+"][B:"+countB+"][DECK:"+countDECK+"][OUT:"+countOUT+"]");
 
-		if((countA == 0 || countB == 0) && gameComponent.GameMode == 2)
+		if((countA == 0 || countB == 0) && gameComponent.GameMode == 3)
 		{
-			gameComponent.GameMode = 3;
+			gameComponent.GameMode = 4;
 			if(countA == 0)
 			{
 				gameComponent.writeText("FINISH[A]",gameComponent.main_text);
@@ -203,36 +161,29 @@ public class BabaManager : MonoBehaviour
 	}
 	private void StartGame()
 	{
-		/*
-		Card info;
-
 		//--------------------UI表示--------------
-		writeText(null,helper);
-		writeText("カード配布&整理中",main);
+		gameComponent.writeText(null,helper);
+		gameComponent.writeText("カード配布&整理中",gameComponent.main_text);
 		//----------------------------------------
-		foreach(GameObject obj in deck)
+		foreach(GameObject obj in gameComponent.deck)
 		{
-			info = obj.GetComponent<Card>();
-			//Debug.Log("カードチェック"+info.CardMode);
-			if(info.CardMode == MyPC)
+			Card info = obj.GetComponent<Card>();
+			if(info.CardMode == gameComponent.MyPC)
 			{
 				CheckCard(obj);
 			}
 		}
 		//--------------------UI表示-------------
-		writeText("ゲームスタート",main);
+		gameComponent.writeText("ゲームスタート",gameComponent.main_text);
 		//----------------------------------------
-		*/
 	}
 
 	private void CheckCard(GameObject obj_search)
 	{
-		/*
-		Card info;
 		Card info_to = obj_search.GetComponent<Card>();
-		foreach(GameObject obj in deck)
+		foreach(GameObject obj in gameComponent.deck)
 		{
-			info = obj.GetComponent<Card>();
+			Card info = obj.GetComponent<Card>();
 			if(info.CardMode == info_to.CardMode)
 			{
 				if(info.Number == info_to.Number)
@@ -247,30 +198,17 @@ public class BabaManager : MonoBehaviour
 						//Debug.Log("検索対象"+info_to.Mark+":"+info_to.Number);
 						info.CardMode = "OUT";
 						info_to.CardMode = "OUT";
-						//oscController.updateCard("updateCard",obj_search);
-						waitTime(100);
-						//oscController.updateCard("updateCard",obj);
-						waitTime(100);
-						Reset();
+						gameComponent.updateCard("updateCard",obj_search);
+						gameComponent.updateCard("updateCard",obj);
+						gameComponent.reset();
 						break;
 					}
 				}
 			}
 		}
-		*/
 	}
-	private void ExchangeCard(GameObject obj,string player)
-	{
-		/*
-		Card info = obj.GetComponent<Card>();
-		info.CardMode = player;
-		Debug.Log("交換を実行");
-		*/
-	}
-
 	private void GameSystem(string message)
 	{	
-		/*
 		if(message != null)
 		{
 			string[] messageData = message.Split('/');
@@ -282,11 +220,11 @@ public class BabaManager : MonoBehaviour
 			else
 			{
 	  			//デッキを定めたルールで配布する
-	  			else if(messageData[1].ToString() == "startGame")
+	  			if(messageData[1].ToString() == "startGame")
 	  			{
 	  				Debug.Log("startGame該当");
-	  				SetDeck(player_number,deck);
-	  				GameMode = 2;
+	  				gameComponent.setDeck(player_number,gameComponent.deck);
+	  				gameComponent.GameMode = 3;
 	  			}
 	  			//相手側のカードをリクエストする
 	  			else if(messageData[1].ToString() == "ResetGame")
@@ -301,51 +239,24 @@ public class BabaManager : MonoBehaviour
 	  				Debug.Log("exchange該当");
 	  				Debug.Log("相手の入力を確認");
 	  				myturn = true;
-	  				GameObject obj = updateCard(messageData[2].ToString());
+	  				GameObject obj = gameComponent.updateCard(messageData[2].ToString());
 	  				CheckCard(obj);
-	  				Reset();
+	  				gameComponent.reset();
 	  			}
 			}
   		}
-  		*/
 	}
-	private void RequestDeck()
+	//--------------------------------OSC関連------------------------
+	/**
+	* 手札のカードの交換を行うためのメゾット
+	**/
+	private void exchange(string sys,GameObject card)
 	{
-		/*
-		Debug.Log("デッキの確認[null]を行います");
-		//int i = 0;
-		while(decklock == false)
-		{
-			foreach(GameObject obj in deck)
-			{
-				if(obj == null)
-				{
-					//oscController.RequestCard("RequestCard",i,decklock);
-				}
-			}
-		}
-		*/
+		Debug.Log("exchange");
+		OSCController oscComponent = OSC.GetComponent<OSCController> ();
+		Card info = card.GetComponent<Card>();	
+		string message = gameComponent.MyPC + "/" + sys + "/";
+		message = message + info.Mark + "." + info.Number + "." + info.CardMode + ".";
+		oscComponent.oscSendMessege(message);		
 	}
-	/*
-	private bool CheckDeck_mode()
-	{
-		Debug.Log("デッキの確認を行います");
-		bool mode = true;
-		foreach(GameObject obj in deck)
-		{
-			Card info = obj.GetComponent<Card>();
-
-			if(info.CardMode == "DECK")
-			{
-				mode = false;
-				break;
-			}
-		}
-		if(mode == false)
-		{
-			return false;
-		}
-		return true;
-	}
-	*/
 }
